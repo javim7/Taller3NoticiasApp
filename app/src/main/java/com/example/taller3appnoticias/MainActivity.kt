@@ -3,6 +3,7 @@ package com.example.taller3appnoticias
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,15 +18,44 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ArticleAdapter
     private val articleList = mutableListOf<Article>()
+    private var countr:String = ""
+    private var categor:String = ""
+
+    //variables de los botones
+    lateinit var btnUsa: Button
+    lateinit var btnRusia: Button
+    lateinit var btnIndia: Button
+    lateinit var btnColombia: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.searchNews.setOnQueryTextListener(this)
 
+        btnUsa = findViewById(R.id.btnUsa)
+        btnRusia = findViewById(R.id.btnRusia)
+        btnIndia = findViewById(R.id.btnIndia)
+        btnColombia = findViewById(R.id.btnColombia)
+
         initRecyclerView()
-        searchNew("business")
+        searchNew("us","business")
+
+        btnUsa.setOnClickListener {
+            searchNew("us", "business")
+        }
+        btnRusia.setOnClickListener {
+            searchNew("ru", "business")
+        }
+
+        btnIndia.setOnClickListener {
+            searchNew("in", "business")
+        }
+
+        btnColombia.setOnClickListener {
+            searchNew("co", "business")
+        }
 
     }
 
@@ -36,13 +66,15 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
         binding.rvNews.adapter = adapter
     }
 
-    private fun searchNew(category: String) {
+    private fun searchNew(country: String, category: String):String {
 
         val api = Retrofit2()
+        countr = country
+        categor = category
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            val call = api.getService()?.getNewsByCategory("us", category,"4b94054dbc6b4b3b9e50d8f62cde4f6c")
+            val call = api.getService()?.getNewsByCategory(country, category,"73ae5fd097664473b48d5e61d626ffea")
             val news: NewsResponse? = call?.body()
 
             runOnUiThread{
@@ -67,6 +99,8 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
 
         }
 
+        return country
+
     }
 
     private fun hideKeyBoard() {
@@ -80,9 +114,11 @@ class MainActivity : AppCompatActivity(), SearchView.OnQueryTextListener {
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {
+        var count: String = searchNew(countr, categor)
         if(!query.isNullOrEmpty()) {
-            searchNew(query.toLowerCase(Locale.ROOT))
+            searchNew(count, query.toLowerCase(Locale.ROOT))
         }
+
 
         return true
     }
